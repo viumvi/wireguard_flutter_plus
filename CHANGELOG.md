@@ -1,3 +1,9 @@
+## 1.0.5
+* Fixed Android 16KB page size crash by updating WireGuard Tunnel dependency.
+
+## 1.0.4
+* Add VPN Server Hub banners to README.md.
+
 ## 1.0.3
 * Add Windows support.
 * Add support crypto address in README.md.
