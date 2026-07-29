@@ -1,6 +1,6 @@
 name: wireguard_flutter_plus
 description: A Flutter plugin for WireGuard VPN implementation on Android, iOS, macOS, Windows, and Linux. Supports key generation and tunnel management.
-version: 1.0.5
+version: 1.0.7
 homepage: https://orbaninfotech.com
 repository: https://github.com/aakashch0179/wireguard_flutter_plus
 false_secrets:

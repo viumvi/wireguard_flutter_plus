@@ -4,6 +4,7 @@ import UIKit
 #elseif os(macOS)
 import FlutterMacOS
 import Cocoa
+import SystemExtensions
 #else
 #error("Unsupported platform")
 #endif
@@ -17,6 +18,7 @@ public class WireguardFlutterPlugin: NSObject, FlutterPlugin {
     public static var stage: FlutterEventSink?
     private var initialized: Bool = false
     var wireguardMethodChannel: FlutterMethodChannel?
+    private var systemExtensionResult: FlutterResult?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = WireguardFlutterPlugin()
@@ -49,6 +51,9 @@ public class WireguardFlutterPlugin: NSObject, FlutterPlugin {
                 if let groupId = (call.arguments as? [String: Any])?["groupId"] as? String {
                   TrafficStreamHandler.shared.configure(groupId: groupId)
                 }
+                if let extensionBundleId = (call.arguments as? [String: Any])?["extensionBundleId"] as? String {
+                    WireguardFlutterPlugin.utils.providerBundleIdentifier = extensionBundleId
+                }
                 WireguardFlutterPlugin.utils.localizedDescription = localizedDescription
                 WireguardFlutterPlugin.utils.loadProviderManager { err in
                     if err == nil {
@@ -72,6 +77,24 @@ public class WireguardFlutterPlugin: NSObject, FlutterPlugin {
             case "dispose":
                 self.initialized = false
                 result(nil)
+            case "requestMacSystemExtension":
+                #if os(macOS)
+                guard let args = call.arguments as? [String: Any],
+                      let bundleId = args["bundleId"] as? String else {
+                    result(FlutterError(code: "-5", message: "Invalid arguments", details: nil))
+                    return
+                }
+                if #available(macOS 10.15, *) {
+                    self.systemExtensionResult = result
+                    let request = OSSystemExtensionRequest.activationRequest(forExtensionWithIdentifier: bundleId, queue: .main)
+                    request.delegate = self
+                    OSSystemExtensionManager.shared.submitRequest(request)
+                } else {
+                    result(FlutterError(code: "-6", message: "System Extensions require macOS 10.15 or later", details: nil))
+                }
+                #else
+                result(FlutterError(code: "-6", message: "System Extensions are only supported on macOS", details: nil))
+                #endif
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -406,7 +429,8 @@ class VPNUtils {
                         } else if let session = tunnelManager.connection as? NETunnelProviderSession {
                             do {
                                 try session.startTunnel(options: nil)
-                                 self.vpnStartTime = Date() 
+                                self.vpnStartTime = Date() 
+                                self.providerManager = tunnelManager
                                 completion(true)
                             } catch {
                                 print("Error (startTunnel): \(error)")
@@ -446,3 +470,29 @@ class VPNUtils {
     }
 
 }
+
+#if os(macOS)
+@available(macOS 10.15, *)
+extension WireguardFlutterPlugin: OSSystemExtensionRequestDelegate {
+    public func request(_ request: OSSystemExtensionRequest, actionForReplacingExtension existing: OSSystemExtensionProperties, withExtension ext: OSSystemExtensionProperties) -> OSSystemExtensionRequest.ReplacementAction {
+        print("System Extension replacement request: replacing \(existing.bundleVersion) with \(ext.bundleVersion)")
+        return .replace
+    }
+    
+    public func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
+        print("System Extension requires user approval in Privacy & Security settings.")
+    }
+    
+    public func request(_ request: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
+        print("System Extension successfully installed.")
+        self.systemExtensionResult?(true)
+        self.systemExtensionResult = nil
+    }
+    
+    public func request(_ request: OSSystemExtensionRequest, didFailWithError error: Error) {
+        print("System Extension installation failed with error: \(error.localizedDescription)")
+        self.systemExtensionResult?(FlutterError(code: "-7", message: "System Extension failed to install", details: error.localizedDescription))
+        self.systemExtensionResult = nil
+    }
+}
+#endif

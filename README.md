@@ -115,7 +115,7 @@ PersistentKeepalive = 25
 
 ### 3. Connect
 
-Start the VPN tunnel.
+Start the VPN tunnel. You can also specify apps to bypass or exclusively use the VPN via the Split Tunneling feature (currently supported on Android and Linux).
 
 ```dart
 void connect() async {
@@ -123,10 +123,17 @@ void connect() async {
     serverAddress: '147.135.15.16:443', // Required for reachability checks
     wgQuickConfig: conf, 
     providerBundleIdentifier: 'com.example.WGExtension', // iOS/macOS Extension Bundle ID
+    
+    // Optional: Split Tunneling
+    // excludedApps: ['com.android.chrome'], // Apps that bypass the VPN
+    // includedApps: ['com.whatsapp'], // ONLY these apps use the VPN
   );
 }
-
 ```
+
+> **Note on Split Tunneling:**
+> - `excludedApps`: Bypasses the VPN for the listed package names. All other apps on the device will route through the VPN.
+> - `includedApps`: Isolates the VPN to ONLY the listed package names. All other apps on the device will bypass the VPN.
 
 ### 4. Disconnect
 

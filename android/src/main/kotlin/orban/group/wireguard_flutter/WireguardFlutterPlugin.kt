@@ -301,7 +301,25 @@ if (!savedTunnelName.isNullOrEmpty() && !savedConfigString.isNullOrEmpty()) {
                 checkAndRequestVpnPermission(result)
             }
             "start" -> {
-                connect(call.argument<String>("wgQuickConfig").toString(), result)
+                val wgQuickConfig = call.argument<String>("wgQuickConfig").toString()
+                val excludedApps = call.argument<String>("excludedApps")
+                val includedApps = call.argument<String>("includedApps")
+                
+                var finalConfig = wgQuickConfig
+                if (!excludedApps.isNullOrEmpty()) {
+                    finalConfig = finalConfig.replaceFirst(
+                        Regex("(?i)\\[Interface\\]"),
+                        "[Interface]\nExcludedApplications = $excludedApps"
+                    )
+                }
+                if (!includedApps.isNullOrEmpty()) {
+                    finalConfig = finalConfig.replaceFirst(
+                        Regex("(?i)\\[Interface\\]"),
+                        "[Interface]\nIncludedApplications = $includedApps"
+                    )
+                }
+
+                connect(finalConfig, result)
 
                 if (!isVpnChecked) {
         scope.launch(Dispatchers.IO) {

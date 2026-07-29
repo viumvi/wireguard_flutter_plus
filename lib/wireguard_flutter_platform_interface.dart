@@ -12,13 +12,20 @@ abstract class WireGuardFlutterInterface {
 
   /// Initializes the VPN engine.
   Future<void> initialize(
-      {required String interfaceName, String? vpnName, String? iosAppGroup});
+      {required String interfaceName, String? vpnName, String? iosAppGroup, String? extensionBundleId});
+
+  /// Requests macOS system extension installation.
+  Future<void> requestMacSystemExtension(String bundleId) {
+    throw UnimplementedError('requestMacSystemExtension() has not been implemented.');
+  }
 
   /// Starts the VPN tunnel.
   Future<void> startVpn({
     required String serverAddress,
     required String wgQuickConfig,
     required String providerBundleIdentifier,
+    List<String>? excludedApps,
+    List<String>? includedApps,
   });
 
   /// Stops the VPN tunnel.

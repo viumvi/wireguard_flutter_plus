@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:wireguard_flutter_plus/wireguard_flutter_plus.dart';
@@ -44,15 +45,17 @@ class _MyAppState extends State<MyApp> {
   final _config = TextEditingController(
     text: '''
 [Interface]
-PrivateKey = SKYYR9cp1GwZ8gnfhHyVc98uJpTgi3sqjJmezs8RqmI=
-Address = 10.104.0.111/32
-DNS = 1.1.1.1, 8.8.8.8
+PrivateKey = GEin20qgtPLGhcDp6CJW3EKlIKDJo+EU1CAfQN3c5Wk=
+Address = 10.0.0.2/32
+DNS = 1.1.1.1, 1.0.0.1
+MTU = 1420
 
+# Peer
 [Peer]
-PublicKey = Rn6w1t6actF9XC0bMIXxO25rf31uFqm2/n5sYyK1UzQ=
-Endpoint = 147.135.37.178:443
-AllowedIPs = 0.0.0.0/0, ::/0
-PersistentKeepalive = 25
+PublicKey = jwZL4jcWx+TYRe5eHLidkxKcYGVr19mfJ9QQWCztsGA=
+AllowedIPs = 0.0.0.0/0
+Endpoint = poland.vpnserverhub.com:48874
+
 
  ''',
   );
@@ -100,11 +103,21 @@ PersistentKeepalive = 25
   }
 
   Future<void> initialize() async {
+    if (Platform.isMacOS) {
+      try {
+        await wireguard.requestMacSystemExtension(
+            'com.orbanvpn.wireguard.WGSystemExtension');
+        // The user may need to go to System Settings -> Privacy & Security -> Allow
+      } catch (e) {
+        print('Failed to install system extension: $e');
+        return;
+      }
+    }
     try {
       await wireguard.initialize(
         interfaceName: "wgflutter",
         vpnName: "Orban VPN",
-        iosAppGroup: "group.com.orbanvpn.wireguard.WGExtension",
+        extensionBundleId: "com.orbanvpn.wireguard.WGSystemExtension",
       );
     } catch (_) {}
   }
@@ -120,10 +133,10 @@ PersistentKeepalive = 25
   void startVpn() async {
     try {
       await wireguard.startVpn(
-        serverAddress: '144.217.253.149:443',
-        wgQuickConfig: _config.text,
-        providerBundleIdentifier: 'com.orbanvpn.wireguard.WGExtension',
-      );
+          serverAddress: '144.217.253.149:443',
+          wgQuickConfig: _config.text,
+          providerBundleIdentifier: 'com.orbanvpn.wireguard.WGSystemExtension',
+          includedApps: ['com.android.chrome']);
     } catch (_) {}
   }
 

@@ -35,8 +35,18 @@ target 'Runner' do
   end
 end
 
+target 'WGSystemExtension' do
+  use_frameworks!
+  use_modular_headers!
+
+  # Link the WireGuard Go core
+  pod 'wireguard_flutter_plus', :path => 'Flutter/ephemeral/.symlinks/plugins/wireguard_flutter_plus/darwin'
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
   end
 end
+
+

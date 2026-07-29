@@ -25,10 +25,16 @@ class WireGuardFlutterLinux extends WireGuardFlutterInterface {
   Future<void> initialize(
       {required String interfaceName,
       String? vpnName,
-      String? iosAppGroup}) async {
+      String? iosAppGroup,
+      String? extensionBundleId}) async {
     name = interfaceName.replaceAll(' ', '_');
     tunnelName = interfaceName; // ✅ Assign tunnelName
     await refreshStage();
+  }
+
+  @override
+  Future<void> requestMacSystemExtension(String bundleId) {
+    throw UnimplementedError('System extensions are only supported on macOS');
   }
 
   Future<String> get filePath async {
@@ -41,6 +47,8 @@ class WireGuardFlutterLinux extends WireGuardFlutterInterface {
     required String serverAddress,
     required String wgQuickConfig,
     required String providerBundleIdentifier,
+    List<String>? excludedApps,
+    List<String>? includedApps,
   }) async {
     final isAlreadyConnected = await isConnected();
     if (!isAlreadyConnected) {

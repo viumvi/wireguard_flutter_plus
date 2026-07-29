@@ -50,13 +50,26 @@ class WireGuardFlutter extends WireGuardFlutterInterface {
   /// [interfaceName] is the name of the network interface.
   /// [vpnName] is the name of the VPN profile (optional).
   /// [iosAppGroup] is the App Group ID for iOS/macOS shared container (optional).
+  /// [extensionBundleId] is the bundle ID of the System Extension (macOS only, optional).
   @override
   Future<void> initialize(
-      {required String interfaceName, String? vpnName, String? iosAppGroup}) {
+      {required String interfaceName, String? vpnName, String? iosAppGroup, String? extensionBundleId}) {
     return _instance.initialize(
         interfaceName: interfaceName,
         vpnName: vpnName,
-        iosAppGroup: iosAppGroup);
+        iosAppGroup: iosAppGroup,
+        extensionBundleId: extensionBundleId);
+  }
+
+  /// Requests macOS system extension installation.
+  ///
+  /// [bundleId] is the bundle ID of the System Extension.
+  Future<void> requestMacSystemExtension(String bundleId) async {
+    if (Platform.isMacOS) {
+      await _instance.requestMacSystemExtension(bundleId);
+    } else {
+      throw UnsupportedError('System extensions are only supported on macOS');
+    }
   }
 
   /// Starts the VPN tunnel.
@@ -69,11 +82,15 @@ class WireGuardFlutter extends WireGuardFlutterInterface {
     required String serverAddress,
     required String wgQuickConfig,
     required String providerBundleIdentifier,
+    List<String>? excludedApps,
+    List<String>? includedApps,
   }) async {
     return _instance.startVpn(
       serverAddress: serverAddress,
       wgQuickConfig: wgQuickConfig,
       providerBundleIdentifier: providerBundleIdentifier,
+      excludedApps: excludedApps,
+      includedApps: includedApps,
     );
   }
 
