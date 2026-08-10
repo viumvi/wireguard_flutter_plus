@@ -206,6 +206,39 @@ namespace wireguard_flutter
       return true;
     }
 
+    bool RunHiddenCommand(const std::wstring &command_line)
+    {
+      STARTUPINFOW startup_info{};
+      startup_info.cb = sizeof(startup_info);
+      startup_info.dwFlags = STARTF_USESHOWWINDOW;
+      startup_info.wShowWindow = SW_HIDE;
+
+      PROCESS_INFORMATION process_info{};
+      std::wstring mutable_cmd = command_line;
+
+      const BOOL ok = CreateProcessW(
+          nullptr,
+          mutable_cmd.data(),
+          nullptr,
+          nullptr,
+          FALSE,
+          CREATE_NO_WINDOW,
+          nullptr,
+          nullptr,
+          &startup_info,
+          &process_info);
+
+      if (!ok)
+      {
+        return false;
+      }
+
+      WaitForSingleObject(process_info.hProcess, 3000);
+      CloseHandle(process_info.hThread);
+      CloseHandle(process_info.hProcess);
+      return true;
+    }
+
     void EnsureEndpointBypassRoute(const std::string &endpoint_host)
     {
       if (endpoint_host.empty())
@@ -244,10 +277,13 @@ namespace wireguard_flutter
         return;
       }
 
-      std::ostringstream cmd;
-      cmd << "cmd /C route DELETE " << endpoint_ip << " >NUL 2>&1 & "
-          << "route ADD " << endpoint_ip << " MASK 255.255.255.255 " << gw_buf << " METRIC 1 >NUL 2>&1";
-      std::system(cmd.str().c_str());
+        const std::wstring endpoint_ip_w = Utf8ToWide(endpoint_ip);
+        const std::wstring gw_w = Utf8ToWide(gw_buf);
+
+        std::wostringstream cmd;
+        cmd << L"cmd /C route DELETE " << endpoint_ip_w << L" >NUL 2>&1 & "
+          << L"route ADD " << endpoint_ip_w << L" MASK 255.255.255.255 " << gw_w << L" METRIC 1 >NUL 2>&1";
+        RunHiddenCommand(cmd.str());
     }
 
     std::string ToUtf8Safe(const std::string &input)
