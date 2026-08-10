@@ -53,7 +53,7 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
 add_subdirectory(external)
-target_link_libraries(${PLUGIN_NAME} PRIVATE base64 iphlpapi)
+target_link_libraries(${PLUGIN_NAME} PRIVATE base64 iphlpapi ws2_32)
 
 add_compile_definitions(WIN32_LEAN_AND_MEAN) # for Wireguard winsock/windows conflict
 
@@ -87,6 +87,20 @@ set(wireguard_flutter_plus_bundled_libraries
   "${CMAKE_CURRENT_SOURCE_DIR}/lib/wireguard/amd64/wireguard.dll"
   "${CMAKE_CURRENT_SOURCE_DIR}/lib/tunnel/amd64/tunnel.dll"
   "${CMAKE_CURRENT_SOURCE_DIR}/lib/wireguard_svc/amd64/wireguard_svc.exe"
+)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/amneziawg/amd64/amneziawg.exe")
+  list(APPEND wireguard_flutter_plus_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/amneziawg/amd64/amneziawg.exe")
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/amneziawg/amd64/wintun.dll")
+  list(APPEND wireguard_flutter_plus_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/amneziawg/amd64/wintun.dll")
+endif()
+
+set(wireguard_flutter_plus_bundled_libraries
+  ${wireguard_flutter_plus_bundled_libraries}
   PARENT_SCOPE
 )
 

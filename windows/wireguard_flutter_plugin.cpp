@@ -16,8 +16,12 @@
 #include <flutter/encodable_value.h>
 #include <libbase64.h>
 
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
 #include <memory>
 #include <sstream>
+#include <vector>
 
 #include "config_writer.h"
 #include "service_control.h"
@@ -28,6 +32,326 @@ using namespace std;
 
 namespace wireguard_flutter
 {
+
+  namespace {
+    bool ContainsCaseInsensitive(const std::string &haystack, const std::string &needle)
+    {
+      auto it = std::search(
+          haystack.begin(), haystack.end(),
+          needle.begin(), needle.end(),
+          [](char ch1, char ch2)
+          {
+            return std::tolower(static_cast<unsigned char>(ch1)) ==
+                   std::tolower(static_cast<unsigned char>(ch2));
+          });
+      return it != haystack.end();
+    }
+
+    std::string Trim(const std::string &s)
+    {
+      const char *whitespace = " \t\r\n";
+      const auto begin = s.find_first_not_of(whitespace);
+      if (begin == std::string::npos)
+      {
+        return "";
+      }
+      const auto end = s.find_last_not_of(whitespace);
+      return s.substr(begin, end - begin + 1);
+    }
+
+    bool IsAmneziaConfig(const std::string &config)
+    {
+      static const char *kAmneziaKeys[] = {
+          "\njc=", "\njmin=", "\njmax=", "\ns1=", "\ns2=", "\ns3=", "\ns4=",
+          "\nh1=", "\nh2=", "\nh3=", "\nh4=", "\ni1=", "\ni2=", "\ni3=", "\ni4=", "\ni5="};
+
+      std::string normalized = "\n" + config;
+      for (const auto *key : kAmneziaKeys)
+      {
+        if (ContainsCaseInsensitive(normalized, key))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    bool FileExists(const std::wstring &path)
+    {
+      const DWORD attrs = GetFileAttributesW(path.c_str());
+      return attrs != INVALID_FILE_ATTRIBUTES && !(attrs & FILE_ATTRIBUTE_DIRECTORY);
+    }
+
+    std::string NormalizeConfigForWindows(const std::string &raw_config)
+    {
+      std::istringstream input(raw_config);
+      std::ostringstream out;
+      std::string line;
+
+      while (std::getline(input, line))
+      {
+        if (!line.empty() && line.back() == '\r')
+        {
+          line.pop_back();
+        }
+
+        const std::string trimmed = Trim(line);
+        if (trimmed.empty())
+        {
+          out << "\r\n";
+          continue;
+        }
+
+        if (trimmed[0] == '[' || trimmed[0] == '#' || trimmed[0] == ';')
+        {
+          out << trimmed << "\r\n";
+          continue;
+        }
+
+        const auto eq = trimmed.find('=');
+        if (eq == std::string::npos)
+        {
+          out << trimmed << "\r\n";
+          continue;
+        }
+
+        const std::string key = Trim(trimmed.substr(0, eq));
+        const std::string value = Trim(trimmed.substr(eq + 1));
+        out << key << " = " << value << "\r\n";
+      }
+
+      return out.str();
+    }
+
+    std::string ExtractEndpointHost(const std::string &wg_config)
+    {
+      std::istringstream input(wg_config);
+      std::string line;
+      while (std::getline(input, line))
+      {
+        if (!line.empty() && line.back() == '\r')
+        {
+          line.pop_back();
+        }
+
+        const std::string trimmed = Trim(line);
+        if (!ContainsCaseInsensitive(trimmed, "endpoint"))
+        {
+          continue;
+        }
+
+        const auto eq = trimmed.find('=');
+        if (eq == std::string::npos)
+        {
+          continue;
+        }
+
+        std::string value = Trim(trimmed.substr(eq + 1));
+        if (value.empty())
+        {
+          continue;
+        }
+
+        const auto hash = value.find('#');
+        if (hash != std::string::npos)
+        {
+          value = Trim(value.substr(0, hash));
+        }
+
+        if (!value.empty() && value.front() == '[')
+        {
+          const auto close = value.find(']');
+          if (close != std::string::npos)
+          {
+            return value.substr(1, close - 1);
+          }
+        }
+
+        const auto colon = value.rfind(':');
+        if (colon != std::string::npos)
+        {
+          return value.substr(0, colon);
+        }
+
+        return value;
+      }
+
+      return "";
+    }
+
+    bool ResolveIpv4Host(const std::string &host, std::string &out_ip)
+    {
+      addrinfo hints{};
+      hints.ai_family = AF_INET;
+      hints.ai_socktype = SOCK_DGRAM;
+      hints.ai_protocol = IPPROTO_UDP;
+
+      addrinfo *result = nullptr;
+      if (getaddrinfo(host.c_str(), nullptr, &hints, &result) != 0 || result == nullptr)
+      {
+        return false;
+      }
+
+      auto *addr = reinterpret_cast<sockaddr_in *>(result->ai_addr);
+      char ip_buf[INET_ADDRSTRLEN] = {};
+      const char *ok = inet_ntop(AF_INET, &addr->sin_addr, ip_buf, INET_ADDRSTRLEN);
+      freeaddrinfo(result);
+
+      if (!ok)
+      {
+        return false;
+      }
+
+      out_ip = ip_buf;
+      return true;
+    }
+
+    void EnsureEndpointBypassRoute(const std::string &endpoint_host)
+    {
+      if (endpoint_host.empty())
+      {
+        return;
+      }
+
+      std::string endpoint_ip;
+      if (!ResolveIpv4Host(endpoint_host, endpoint_ip))
+      {
+        return;
+      }
+
+      in_addr dst_addr{};
+      if (inet_pton(AF_INET, endpoint_ip.c_str(), &dst_addr) != 1)
+      {
+        return;
+      }
+
+      MIB_IPFORWARDROW best_route{};
+      if (GetBestRoute(dst_addr.S_un.S_addr, 0, &best_route) != NO_ERROR)
+      {
+        return;
+      }
+
+      if (best_route.dwForwardNextHop == 0)
+      {
+        return;
+      }
+
+      in_addr gw_addr{};
+      gw_addr.S_un.S_addr = best_route.dwForwardNextHop;
+      char gw_buf[INET_ADDRSTRLEN] = {};
+      if (inet_ntop(AF_INET, &gw_addr, gw_buf, INET_ADDRSTRLEN) == nullptr)
+      {
+        return;
+      }
+
+      std::ostringstream cmd;
+      cmd << "cmd /C route DELETE " << endpoint_ip << " >NUL 2>&1 & "
+          << "route ADD " << endpoint_ip << " MASK 255.255.255.255 " << gw_buf << " METRIC 1 >NUL 2>&1";
+      std::system(cmd.str().c_str());
+    }
+
+    std::string ToUtf8Safe(const std::string &input)
+    {
+      auto continuation = [](unsigned char ch) {
+        return (ch & 0xC0) == 0x80;
+      };
+
+      bool all_valid_utf8 = true;
+      std::string out;
+      out.reserve(input.size());
+
+      for (size_t i = 0; i < input.size();)
+      {
+        const unsigned char c0 = static_cast<unsigned char>(input[i]);
+
+        if (c0 <= 0x7F)
+        {
+          out.push_back(static_cast<char>(c0));
+          ++i;
+          continue;
+        }
+
+        if (c0 >= 0xC2 && c0 <= 0xDF)
+        {
+          if (i + 1 < input.size())
+          {
+            const unsigned char c1 = static_cast<unsigned char>(input[i + 1]);
+            if (continuation(c1))
+            {
+              out.push_back(static_cast<char>(c0));
+              out.push_back(static_cast<char>(c1));
+              i += 2;
+              continue;
+            }
+          }
+          all_valid_utf8 = false;
+          ++i;
+          continue;
+        }
+
+        if (c0 >= 0xE0 && c0 <= 0xEF)
+        {
+          if (i + 2 < input.size())
+          {
+            const unsigned char c1 = static_cast<unsigned char>(input[i + 1]);
+            const unsigned char c2 = static_cast<unsigned char>(input[i + 2]);
+            const bool valid = continuation(c1) && continuation(c2) &&
+                               !(c0 == 0xE0 && c1 < 0xA0) &&
+                               !(c0 == 0xED && c1 >= 0xA0);
+            if (valid)
+            {
+              out.push_back(static_cast<char>(c0));
+              out.push_back(static_cast<char>(c1));
+              out.push_back(static_cast<char>(c2));
+              i += 3;
+              continue;
+            }
+          }
+          all_valid_utf8 = false;
+          ++i;
+          continue;
+        }
+
+        if (c0 >= 0xF0 && c0 <= 0xF4)
+        {
+          if (i + 3 < input.size())
+          {
+            const unsigned char c1 = static_cast<unsigned char>(input[i + 1]);
+            const unsigned char c2 = static_cast<unsigned char>(input[i + 2]);
+            const unsigned char c3 = static_cast<unsigned char>(input[i + 3]);
+            const bool valid = continuation(c1) && continuation(c2) && continuation(c3) &&
+                               !(c0 == 0xF0 && c1 < 0x90) &&
+                               !(c0 == 0xF4 && c1 > 0x8F);
+            if (valid)
+            {
+              out.push_back(static_cast<char>(c0));
+              out.push_back(static_cast<char>(c1));
+              out.push_back(static_cast<char>(c2));
+              out.push_back(static_cast<char>(c3));
+              i += 4;
+              continue;
+            }
+          }
+          all_valid_utf8 = false;
+          ++i;
+          continue;
+        }
+
+        all_valid_utf8 = false;
+        ++i;
+      }
+
+      if (all_valid_utf8)
+      {
+        return input;
+      }
+
+      // Some Windows APIs/third-party code may still produce CP_ACP bytes.
+      // Convert those bytes to UTF-8 so MethodChannel strings are readable in Dart.
+      return WideToUtf8(AnsiToWide(input));
+    }
+
+  }
 
   // static
   void WireguardFlutterPlugin::RegisterWithRegistrar(PluginRegistrarWindows *registrar)
@@ -236,41 +560,81 @@ namespace wireguard_flutter
         return;
       }
 
+      wchar_t module_filename[MAX_PATH];
+      GetModuleFileName(NULL, module_filename, MAX_PATH);
+      auto current_exec_dir = wstring(module_filename);
+      current_exec_dir = current_exec_dir.substr(0, current_exec_dir.find_last_of(L"\\/"));
+
+      const bool is_amnezia = IsAmneziaConfig(*wgQuickConfig);
+
       this->tunnel_service_->EmitState("prepare");
 
       wstring wg_config_filename;
       try
       {
-        // std::cout << "Writing config file..." << std::endl;
-        wg_config_filename = WriteConfigToTempFile(*wgQuickConfig, WideToUtf8(tunnel_service->service_name_));
-        // std::cout << "Config file writen: " << WideToUtf8(wg_config_filename) << std::endl; // Debug log
+        const std::string endpoint_host = ExtractEndpointHost(*wgQuickConfig);
+        EnsureEndpointBypassRoute(endpoint_host);
+
+        const std::string normalized_config = NormalizeConfigForWindows(*wgQuickConfig);
+        wg_config_filename = WriteConfigToTempFile(normalized_config, WideToUtf8(tunnel_service->service_name_));
       }
       catch (exception &e)
       {
-        // std::cout << "Failed to write config: " << e.what() << std::endl;
         this->tunnel_service_->EmitState("no_connection");
-        result->Error(string("Could not write wireguard config: ").append(e.what()));
+        result->Error("WRITE_CONFIG_FAILED", string("Could not write wireguard config: ").append(ToUtf8Safe(e.what())));
         return;
       }
 
-      wchar_t module_filename[MAX_PATH];
-      GetModuleFileName(NULL, module_filename, MAX_PATH);
-      auto current_exec_dir = wstring(module_filename);
-      current_exec_dir = current_exec_dir.substr(0, current_exec_dir.find_last_of(L"\\/"));
-      wostringstream service_exec_builder;
-      service_exec_builder << current_exec_dir << "\\wireguard_svc.exe" << L" -service"
-                           << L" -config-file=\"" << wg_config_filename << "\"";
-      wstring service_exec = service_exec_builder.str();
-      // cout << "Starting service with command line: " << WideToUtf8(service_exec) << endl; // Use WideToUtf8
+      std::vector<std::wstring> service_exec_candidates;
+
+      auto add_legacy_service_candidate = [&](const std::wstring &exe_name)
+      {
+        const std::wstring base = current_exec_dir + L"\\" + exe_name;
+        if (FileExists(base))
+        {
+          service_exec_candidates.push_back(base + L" -service -config-file=\"" + wg_config_filename + L"\"");
+        }
+      };
+
+      if (is_amnezia)
+      {
+        const std::wstring amneziawg = current_exec_dir + L"\\amneziawg.exe";
+        if (FileExists(amneziawg))
+        {
+          // amneziawg.exe supports Windows service mode via /tunnelservice CONFIG_PATH.
+          service_exec_candidates.push_back(amneziawg + L" /tunnelservice \"" + wg_config_filename + L"\"");
+        }
+      }
+
+      add_legacy_service_candidate(L"wireguard_svc.exe");
+
+      std::string last_start_error;
       try
       {
-        CreateArgs csa;
-        csa.description = tunnel_service->service_name_ + L" WireGuard tunnel";
-        csa.executable_and_args = service_exec;
-        csa.dependencies = L"Nsi\0TcpIp\0";
-        csa.first_time = true;
+        bool started = false;
+        for (const auto &service_exec : service_exec_candidates)
+        {
+          try
+          {
+            CreateArgs csa;
+            csa.description = tunnel_service->service_name_ + L" WireGuard tunnel";
+            csa.executable_and_args = service_exec;
+            csa.dependencies = L"Nsi\0TcpIp\0";
 
-        tunnel_service->CreateAndStart(csa);
+            tunnel_service->CreateAndStart(csa);
+            started = true;
+            break;
+          }
+          catch (exception &e)
+          {
+            last_start_error = ToUtf8Safe(e.what());
+          }
+        }
+
+        if (!started)
+        {
+          throw runtime_error(last_start_error.empty() ? "Failed to start tunnel service" : last_start_error);
+        }
         
         // Timer logic: Reset start time and traffic counters on successful start
         start_time_ = GetTickCount64();
@@ -280,7 +644,7 @@ namespace wireguard_flutter
       catch (exception &e)
       {
         // std::cout << "Failed to start service: " << e.what() << std::endl;
-        result->Error(string(e.what()));
+        result->Error("SERVICE_START_FAILED", ToUtf8Safe(e.what()));
         return;
       }
 
@@ -307,7 +671,7 @@ namespace wireguard_flutter
       }
       catch (exception &e)
       {
-        result->Error(string(e.what()));
+        result->Error("SERVICE_STOP_FAILED", ToUtf8Safe(e.what()));
       }
 
       result->Success();
