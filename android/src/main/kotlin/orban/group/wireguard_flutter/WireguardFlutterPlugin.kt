@@ -214,14 +214,13 @@ if (!savedTunnelName.isNullOrEmpty() && !savedConfigString.isNullOrEmpty()) {
 
             // Update stage/state after restoring
             val isActive = isVpnActive()
+            Log.i(TAG, "System isVpnActive on startup: $isActive")
             
             // If VPN is active and we have restored config, register tunnel with backend
             // This allows disconnect to work without creating a new TUN interface
-            if (isActive && !savedTunnelName.isNullOrEmpty() && config != null) {
-                try {
-                    // Only register if backend reports running tunnels
-                    val runningTunnels = backend!!.runningTunnelNames
-                    if (runningTunnels.isNotEmpty()) {
+            if (isActive) {
+                if (!savedTunnelName.isNullOrEmpty()) {
+                    try {
                         // Reset tunnel singleton to ensure fresh creation
                         tunnel = null
                         
@@ -231,22 +230,17 @@ if (!savedTunnelName.isNullOrEmpty() && !savedConfigString.isNullOrEmpty()) {
                         }
                         
                         Log.i(TAG, "Tunnel object recreated for existing VPN connection")
-                        updateStage("connected")
                         
                         // Resume traffic monitoring and foreground service
                         startForegroundService()
                         startTrafficMonitor()
-                    } else {
-                        // System reports VPN active but backend has no tunnels
-                        // This can happen briefly after disconnect
-                        updateStage("disconnected")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to recreate tunnel object: ${e.message}", e)
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to recreate tunnel object: ${e.message}", e)
-                    updateStage("disconnected")
                 }
+                updateStage("connected")
             } else {
-                updateStage(if (isActive) "connected" else "disconnected")
+                updateStage("disconnected")
             }
 
 
@@ -334,7 +328,16 @@ if (!savedTunnelName.isNullOrEmpty() && !savedConfigString.isNullOrEmpty()) {
                 disconnect(result)
             }
             "stage" -> {
-                result.success(getStatus())
+                // Check the actual system VPN status (key icon in the status bar)
+                if (isVpnActive()) {
+                    state = "connected"
+                    result.success("connected")
+                } else {
+                    if (state == "connected") {
+                        state = "disconnected"
+                    }
+                    result.success(getStatus())
+                }
             }
             "checkPermission" -> {
                 checkPermission()
