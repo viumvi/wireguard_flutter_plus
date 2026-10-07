@@ -100,10 +100,11 @@ class WireguardFlutterPlugin :
                 runtime.traffic.collect { sample ->
                     trafficSink?.success(
                         mapOf(
-                            "totalDownload" to sample.totalRx / 1024,
-                            "totalUpload" to sample.totalTx / 1024,
-                            "downloadSpeed" to sample.downloadSpeed / 1024,
-                            "uploadSpeed" to sample.uploadSpeed / 1024,
+                            // bytes and bytes/s, like on iOS
+                            "totalDownload" to sample.totalRx,
+                            "totalUpload" to sample.totalTx,
+                            "downloadSpeed" to sample.downloadSpeed,
+                            "uploadSpeed" to sample.uploadSpeed,
                             "duration" to sample.durationText,
                         )
                     )
