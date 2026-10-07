@@ -2,7 +2,7 @@ group 'orban.group.wireguard_flutter'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.8.10'
+    ext.kotlin_version = '2.3.20'
     repositories {
         google()
         mavenCentral()
@@ -16,6 +16,7 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
@@ -25,15 +26,15 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 37
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -41,20 +42,23 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        // wgtunnel/core requires Android 8.0+
+        minSdkVersion 26
     }
 
     namespace 'orban.group.wireguard_flutter'
 }
 
+// wgtunnel/core fork with ExcludedIPs support, published to mavenLocal
+def wgtunnelCore = '1.9.0-vpnka.1'
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.zaneschepke:amneziawg-android:2.3.7'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2"
-    implementation 'com.beust:klaxon:5.5'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-
-    /// to run wireguard on Android 25 or lower
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.3"
+    implementation "com.wgtunnel:backend:$wgtunnelCore"
+    implementation "com.wgtunnel:parser:$wgtunnelCore"
+    // hevtunnel is unchanged in the fork, so use the Maven Central build (it ships the native libs)
+    implementation("com.wgtunnel:hevtunnel") { version { strictly '1.9.0' } }
+    implementation "com.wgtunnel:backend-android-jni:$wgtunnelCore"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+    implementation 'androidx.core:core-ktx:1.19.1'
 }

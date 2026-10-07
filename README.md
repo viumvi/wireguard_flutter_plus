@@ -188,7 +188,7 @@ wireguard.trafficSnapshot.listen((data) {
 
 | Platform | Version | Notes |
 | --- | --- | --- |
-| **Android** | SDK 21+ | Supports 16KB Page Size (API 35+) |
+| **Android** | SDK 26+ | Backed by [wgtunnel/core](https://github.com/wgtunnel/core) (AmneziaWG 3.1); 16KB page size |
 | **iOS** | 15.0+ | Requires Network Extension |
 | **macOS** | 12.0+ | Requires Network Extension & App Sandbox |
 | **Windows** | 7+ | Requires Admin Privileges |
@@ -216,3 +216,14 @@ If you find this package useful, you can support the maintenance and development
 
 - **USDT (BEP20):** `0x098f0ba20623c174f2be44dc647334bdb7cadba9`
 - **USDT (TRC20):** `TNieNaB8WQ5UmQKt75e3ZeLAnSSnWLjhT3`
+
+## Android: `ExcludedIPs`
+
+On Android the peer section of `wgQuickConfig` accepts an extra `ExcludedIPs` key. Networks listed
+there are routed outside of the tunnel even when `AllowedIPs` covers them (`AllowedIPs = 0.0.0.0/0`
+plus `ExcludedIPs = <direct networks>` gives a "bypass" mode). It uses `VpnService.Builder.excludeRoute()`
+on Android 13+ and subtracts the networks from `AllowedIPs` on older versions.
+
+This needs the `wgtunnel/core` fork with `ExcludedIPs` support (`com.wgtunnel:*:1.9.0-vpnka.1`), which
+the plugin resolves from `mavenLocal()`. Keep the list to a few thousand entries: Android sends all routes
+in one Binder transaction (1 MB limit) and `excludeRoute()` slows down as the list grows.
