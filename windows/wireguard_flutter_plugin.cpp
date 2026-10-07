@@ -708,6 +708,7 @@ namespace wireguard_flutter
       catch (exception &e)
       {
         result->Error("SERVICE_STOP_FAILED", ToUtf8Safe(e.what()));
+        return;
       }
 
       result->Success();
