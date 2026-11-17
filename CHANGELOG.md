@@ -1,4 +1,5 @@
 ## Unreleased
+* iOS/macOS: added Swift Package Manager support while retaining CocoaPods compatibility.
 * Android: replaced `com.zaneschepke:amneziawg-android` with `com.wgtunnel:*` (wgtunnel/core, AmneziaWG 3.1 parameters).
 * Android: new `ExcludedIPs` peer key for "bypass" routing.
 * Android: minSdk is now 26, requires compileSdk 37 and AGP 9.1+.

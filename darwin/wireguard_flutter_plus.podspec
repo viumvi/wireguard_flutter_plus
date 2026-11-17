@@ -14,7 +14,7 @@ Wireguard flutter SDK for iOS/macOS
   s.author = { "Orban Infotech" => "puttu0179@gmail.com" }
 
   s.source = { :path => "." }
-  s.source_files = "Classes/**/*"
+  s.source_files = "wireguard_flutter_plus/Sources/wireguard_flutter_plus/**/*"
 
 #   s.platform = :ios, "15.0"
 
