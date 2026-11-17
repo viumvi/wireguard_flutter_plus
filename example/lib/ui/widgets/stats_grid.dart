@@ -5,6 +5,7 @@ class TrafficStatsWidget extends StatelessWidget {
   final String uploadSpeed;
   final String totalDownload;
   final String totalUpload;
+  final String duration;
 
   const TrafficStatsWidget({
     super.key,
@@ -12,6 +13,7 @@ class TrafficStatsWidget extends StatelessWidget {
     required this.uploadSpeed,
     required this.totalDownload,
     required this.totalUpload,
+    this.duration = "00:00:00",
   });
 
   @override
@@ -43,7 +45,65 @@ class TrafficStatsWidget extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        _buildDurationCard(
+          context,
+          "Connection Time",
+          duration,
+          Icons.timer_outlined,
+          Colors.amberAccent,
+        ),
       ],
+    );
+  }
+
+  Widget _buildDurationCard(
+    BuildContext context,
+    String title,
+    String durationValue,
+    IconData icon,
+    Color color,
+  ) {
+    return Card(
+      elevation: 0,
+      color: const Color(0xFF1E293B),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 22, color: color),
+            ),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF94A3B8),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  durationValue,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1.2,
+                      ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

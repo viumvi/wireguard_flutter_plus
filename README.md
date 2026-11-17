@@ -6,12 +6,9 @@
 <br/>
 
 <a href="https://vpnserverhub.com" target="_blank">
-    <img src="https://vpnserverhub.com/manual_storage/gallery/1773653784_Screenshot 2026-03-16 at 3.04.49 PM.png" alt="VPN Server Hub" />
+    <img src="https://vpnserverhub.com/manual_storage/gallery/1778155695_Screenshot 2026-03-16 at 3.04.49 PM.png" alt="VPN Server Hub" />
 </a>
 
-<a href="https://vpnserverhub.com" target="_blank">
-    <img src="https://vpnserverhub.com/manual_storage/gallery/1773655278_Screenshot%202026-03-16%20at%203.30.27%E2%80%AFPM.png" alt="VPN Server Hub" />
-</a>
 
 <br/>
 
@@ -42,7 +39,7 @@ flutter pub add wireguard_flutter_plus
 
 ### iOS & macOS
 > [!IMPORTANT]
-> **Detailed iOS Setup Guide**: Please read [ios_setup_readme.md](ios_setup_readme.md) for step-by-step instructions on setting up Network Extensions and App Groups.
+> **Detailed iOS & macOS Setup Guide**: Please read [ios_setup_readme.md](ios_setup_readme.md) for step-by-step instructions on setting up Network Extensions, macOS App Sandboxing entitlements, and App Groups.
 
 To use WireGuard on Apple platforms, you must create a **Network Extension** target in Xcode.
 
@@ -165,6 +162,7 @@ wireguard.trafficSnapshot.listen((data) {
   print("Upload Speed: ${data["uploadSpeed"]}");
   print("Total Download: ${data["totalDownload"]}");
   print("Total Upload: ${data["totalUpload"]}");
+  print("Duration: ${data["duration"]}");
 });
 
 ```

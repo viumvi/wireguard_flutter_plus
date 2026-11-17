@@ -1,128 +1,190 @@
-# iOS Setup Guide for WireGuard Flutter Plus
+# iOS & macOS Setup Guide for WireGuard Flutter Plus
 
-Setting up WireGuard on iOS requires a few additional steps compared to Android due to Apple's security sandbox and Network Extension requirements.
+Setting up WireGuard on iOS and macOS requires a few additional steps compared to Android due to Apple's security sandbox and Network Extension requirements.
+
+---
 
 ## Prerequisites
 
 - macOS with the latest Xcode installed.
-- An Apple Developer Account (required for Network Extensions and App Groups).
-- **Go** installed on your Mac (required for building `wireguard-go-bridge`).
-
-## Step 1: Open Project in Xcode
-
-1. Open your Flutter project in VS Code.
-2. Right-click the `ios` folder and select **Open in Xcode**.
-
-## Step 2: Configure Bundle Identifiers
-
-You need two Bundle IDs: one for the main app and one for the extension.
-
-- **Main App Bundle ID**: e.g., `com.example.vpnapp`
-- **Extension Bundle ID**: Must be a prefix of the main app ID. e.g., `com.example.vpnapp.WGExtension`.
-
-## Step 3: Add Network Extension Target
-
-1. Go to **File > New > Target**.
-2. Select **Network Extension** and click **Next**.
-3. **Product Name**: Enter a name, e.g., `WGExtension`.
-4. **Team**: Select your Apple Development Team.
-5. **Language**: Swift.
-6. **Provider Type**: Packet Tunnel Provider.
-7. Click **Finish** and **Activate** the scheme if prompted.
-
-## Step 4: Setup WireGuardGoBridge (External Build System)
-
-This step compiles the Go code into a static library (`libwg-go.a`) that your extension can link against.
-
-### For iOS:
-1.  **File > New > Target**.
-2.  Go to the **Other** tab and select **External Build System**.
-3.  Click **Next**.
-4.  **Product Name**: `WireGuardGoBridgeiOS`.
-5.  **Build Tool**: `$(PROJECT_DIR)/Scripts/build_go_bridge.sh`
-6.  Click **Finish**.
-
-### For macOS:
-1.  **File > New > Target**.
-2.  Go to the **Other** tab and select **External Build System**.
-3.  Click **Next**.
-4.  **Product Name**: `WireGuardGoBridge`.
-5.  **Build Tool**: `/usr/bin/make`
-6.  Click **Finish**.
-7.  Select the `WireGuardGoBridge` target -> **Info** tab.
-8.  **Directory**: `$(PROJECT_DIR)/WireGuardKitGo`
-9.  **Pass build settings in environment**: Checked.
+- An Apple Developer Account (required for Network Extensions, App Groups, and Provisioning Profiles).
+- **Go** installed on your Mac (`brew install go` or from [golang.org](https://golang.org)) (required for compiling `wireguard-go-bridge`).
 
 ---
 
-## Step 5: Setup Dependencies (Critical)
+## Step 1: Open Project in Xcode
 
-1.  **WireGuardKitGo**:
-    - Download the [wireguard-apple](https://github.com/aakashch0179/wireguard-apple) repository.
-    - Replace the `WireGuardKitGo` directory in your project with the one from the downloaded repository.
+1. Open your Flutter project in VS Code or Terminal.
+2. For iOS: Right-click the `ios` folder and select **Open in Xcode** (or `open ios/Runner.xcworkspace`).
+3. For macOS: Right-click the `macos` folder and select **Open in Xcode** (or `open macos/Runner.xcworkspace`).
 
-2.  **Add Target Dependency**:
-    - Select the **WGExtension** target.
-    - Go to the **Build Phases** tab.
-    - In **Target Dependencies**, click `+` and select **WireGuardGoBridgeiOS** (for iOS) or **WireGuardGoBridge** (for macOS).
+---
 
-3.  **Link Binary With Libraries**:
-    - Still in **WGExtension** > **Build Phases**.
-    - Expand **Link Binary With Libraries**.
-    - Click `+` -> **Add Other...** -> **Add Files...**
-    - Navigate to the `WireGuardKitGo` directory (or wherever the output `libwg-go.a` is located, usually `out/libwg-go.a` after a build).
-    - **Note**: You might need to build the `WireGuardGoBridge` target once first to generate the `.a` file so you can select it.
+## Step 2: Configure Bundle Identifiers
 
-4.  **Configure Go Path**:
-    - Ensure you have Go installed (`brew install go` or download from golang.org).
-    - Go to **Build Settings** for **BOTH** the `Runner` and `WGExtension` targets.
-    - Click `+` to add a **User-Defined Setting**.
-    - Key: `PATH`
-    - Value: `${PATH}:/usr/local/go/bin` (or the path to your Go bin folder).
+You need two Bundle IDs: one for the main application and one for the tunnel extension.
 
-5.  **Disable Sandboxing (If Enabled)**:
-    - For `WGExtension`, `WireGuardGoBridgeiOS`, and `Runner` targets:
-    - Go to **Build Settings**.
-    - Search for `ENABLE_USER_SCRIPT_SANDBOXING`.
-    - Set it to **NO**.
+- **Main App Bundle ID**: e.g., `com.example.vpnapp`
+- **Extension Bundle ID**: Must be prefixed with the main app ID, e.g., `com.example.vpnapp.WGExtension`.
 
-## Step 6: Enable Capabilities
+---
 
-### for Main App (Runner) target:
-1. Select the **Runner** target.
-2. Go to the **Signing & Capabilities** tab.
-3. Click **+ Capability** and add:
+## Step 3: Add Network Extension Target
+
+1. In Xcode, go to **File > New > Target...**.
+2. Select **iOS** (or **macOS**) -> **Network Extension** and click **Next**.
+3. **Product Name**: Enter `WGExtension`.
+4. **Team**: Select your Apple Development Team.
+5. **Language**: `Swift`.
+6. **Provider Type**: `Packet Tunnel Provider`.
+7. Click **Finish** and select **Activate** when prompted for the scheme.
+
+---
+
+## Step 4: Setup WireGuardGoBridge (External Build System)
+
+This step compiles the WireGuard Go code into a static library (`libwg-go.a`) that your extension links against.
+
+### For iOS:
+1. **File > New > Target...**
+2. Go to the **Other** tab and select **External Build System**.
+3. Click **Next**.
+4. **Product Name**: `WireGuardGoBridgeiOS`.
+5. **Build Tool**: `$(PROJECT_DIR)/Scripts/build_go_bridge.sh`.
+6. Click **Finish**.
+
+### For macOS:
+1. **File > New > Target...**
+2. Go to the **Other** tab and select **External Build System**.
+3. Click **Next**.
+4. **Product Name**: `WireGuardGoBridge`.
+5. **Build Tool**: `/usr/bin/make`.
+6. Click **Finish**.
+7. Select the `WireGuardGoBridge` target -> **Info** tab.
+8. **Directory**: `$(PROJECT_DIR)/WireGuardKitGo`
+9. **Pass build settings in environment**: Checked.
+
+---
+
+## Step 5: Setup Dependencies & Build Settings
+
+1. **WireGuardKitGo**:
+   - Download the [wireguard-apple](https://github.com/aakashch0179/wireguard-apple) repository.
+   - Place or replace the `WireGuardKitGo` directory in your project root with the one from the repository.
+
+2. **Add Target Dependency**:
+   - Select the **WGExtension** target.
+   - Go to the **Build Phases** tab.
+   - In **Target Dependencies**, click `+` and select:
+     - `WireGuardGoBridgeiOS` (for iOS), OR
+     - `WireGuardGoBridge` (for macOS).
+
+3. **Link Binary With Libraries**:
+   - In **WGExtension** > **Build Phases**, expand **Link Binary With Libraries**.
+   - Click `+` -> **Add Other...** -> **Add Files...**.
+   - Select `out/libwg-go.a` (build the `WireGuardGoBridge` target once first if the file hasn't been generated yet).
+
+4. **Configure Go Path**:
+   - In **Build Settings** for **BOTH** the `Runner` and `WGExtension` targets:
+   - Click `+` -> **Add User-Defined Setting**.
+   - Key: `PATH`
+   - Value: `${PATH}:/usr/local/go/bin:/opt/homebrew/bin` (adjust to where `go` is installed on your Mac).
+
+5. **Disable User Script Sandboxing**:
+   - For `WGExtension`, `WireGuardGoBridge`, and `Runner` targets:
+   - Go to **Build Settings** -> search for `ENABLE_USER_SCRIPT_SANDBOXING`.
+   - Set it to **NO**.
+
+---
+
+## Step 6: Enable Capabilities & Entitlements
+
+### For iOS:
+
+#### Main App (`Runner`) Target:
+1. Select **Runner** -> **Signing & Capabilities**.
+2. Click **+ Capability**:
    - **Network Extensions**: Check `Packet Tunnel`.
-   - **App Groups**: Click `+` and add a new group, e.g., `group.com.example.vpnapp`. **Check the box.**
+   - **App Groups**: Click `+` and add `group.com.example.vpnapp`. Check the box.
 
-### for Extension (WGExtension) target:
-1. Select the **WGExtension** target.
-2. Go to the **Signing & Capabilities** tab.
-3. Click **+ Capability** and add:
+#### Extension (`WGExtension`) Target:
+1. Select **WGExtension** -> **Signing & Capabilities**.
+2. Click **+ Capability**:
    - **Network Extensions**: Check `Packet Tunnel`.
-   - **App Groups**: **CRITICAL**: Add the **SAME** App Group ID as the main app and **Check the box.**
+   - **App Groups**: Add the **exact same** App Group ID (`group.com.example.vpnapp`) and check the box.
 
-## Step 7: Fix Build Order (Optional but Recommended)
+---
 
-1. Open the **Runner** target > **Build Phases** tab.
-2. Move **Embed Foundation Extensions** to the bottom of the list (after Copy Bundle Resources).
+### For macOS (CRITICAL Sandboxing Requirements):
+
+macOS enforces strict App Sandbox constraints. Without the incoming network server entitlement, the WireGuard Go backend cannot bind its local UDP socket, causing the tunnel to fail with `bind: operation not permitted`.
+
+#### Main App (`Runner`) Target:
+1. Select **Runner** -> **Signing & Capabilities**:
+   - **App Sandbox**: Check **Outgoing Connections (Client)**.
+   - **Network Extensions**: Check `Packet Tunnel`.
+
+#### Extension (`WGExtension`) Target:
+1. Select **WGExtension** -> **Signing & Capabilities**:
+   - **App Sandbox**:
+     - Check **Outgoing Connections (Client)** (`ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES`).
+     - **MANDATORY**: Check **Incoming Connections (Server)** (`ENABLE_INCOMING_NETWORK_CONNECTIONS = YES`).
+   - **Network Extensions**: Check `Packet Tunnel`.
+
+> [!IMPORTANT]
+> **Why Incoming Connections (Server) is Required on macOS**:
+> The WireGuard Go backend calls `net.ListenUDP("udp", &net.UDPAddr{Port: 0})` to bind an ephemeral local port for receiving encrypted WireGuard UDP packets. In the macOS App Sandbox, binding a UDP socket is classified as a server operation. If `com.apple.security.network.server` is not enabled, macOS denies `bind()` with `operation not permitted`, bringing the tunnel interface immediately **Down** with zero download speed.
+
+#### Entitlements Verification for macOS (`WGExtension.entitlements`):
+Ensure your `WGExtension.entitlements` contains both network permissions:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.developer.networking.networkextension</key>
+    <array>
+        <string>packet-tunnel-provider</string>
+    </array>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <key>com.apple.security.network.server</key>
+    <true/>
+</dict>
+</plist>
+```
+
+#### Note on App Groups on macOS:
+On macOS App Sandbox, shared `UserDefaults(suiteName:)` containers strictly require a Team ID prefix (e.g. `$(TeamIdentifierPrefix)group.com.example.vpnapp`). `wireguard_flutter_plus` automatically detects this: if an iOS-style bare identifier (`group.xxx`) is passed, the plugin communicates traffic stats directly via Apple's `NETunnelProviderSession.sendProviderMessage` IPC channel and uses `UserDefaults.standard` to avoid the macOS `cfprefsd` detaching warning.
+
+---
+
+## Step 7: Fix Build Order (Recommended)
+
+1. Open **Runner** > **Build Phases**.
+2. Drag **Embed Foundation Extensions** to the bottom of the list (after **Copy Bundle Resources**).
+
+---
 
 ## Step 8: Flutter Initialization
 
-Pass your App Group ID to the `initialize` method in your Flutter code.
+Pass your App Group ID to `wireguard.initialize`:
 
 ```dart
-await wireGuard.initialize(
+await wireguard.initialize(
   interfaceName: 'wg0',
-  iosAppGroup: 'group.com.example.vpnapp', // <-- YOUR APP GROUP ID
+  vpnName: 'My VPN',
+  iosAppGroup: 'group.com.example.vpnapp', // Your App Group ID
 );
 ```
 
-**Note:** If `iosAppGroup` is not provided, the plugin will default to 'group.com.orbanvpn.wireguard', which will likely NOT match your provisioning profile and will cause the connection to fail.
+---
 
-## Step 9: Connect
+## Step 9: Starting the VPN & Cross-Platform Configs
 
-When starting the VPN, pass your extension's Bundle ID:
+`wireguard_flutter_plus` is designed to be fully cross-platform. The exact same WireGuard configuration syntax works seamlessly across **Android, iOS, Windows, and macOS**:
 
 ```dart
 await wireGuard.startVpn(
@@ -132,65 +194,59 @@ await wireGuard.startVpn(
 );
 ```
 
-## Step 10: Implement PacketTunnelProvider
+### Key Behaviors:
+- **`AllowedIPs = 0.0.0.0/0, ::/0`**: Fully supported on all platforms. If your tunnel interface does not have an IPv6 address, the extension automatically strips `::/0` to prevent routing errors.
+- **Dynamic Endpoint Routing**: The plugin automatically resolves the server host from `Endpoint = ...` in `wgQuickConfig` and sets `protocolConfiguration.serverAddress`. This ensures macOS routes tunnel traffic through your physical Wi-Fi/Ethernet interface without routing loops.
+- **Duration Continuity**: Duration tracking leverages Apple's `NEVPNConnection.connectedDate`. When reopening or hot-restarting the Flutter app while connected, duration immediately resumes from the system's actual connection time without resetting to `00:00:00`.
 
-Replace the contents of your `PacketTunnelProvider.swift` file (created in Step 3/8) with the following code.
-**IMPORTANT**: This code handles the WireGuard connection and traffic statistics reporting.
+---
+
+## Step 10: Implement `PacketTunnelProvider.swift`
+
+Replace the contents of your extension's `PacketTunnelProvider.swift` with the following implementation. It includes:
+- Unified Apple `OSLog` tracing.
+- Automatic IPv6 routing safety filter for IPv4-only interfaces.
+- IPC traffic stats messaging (`getStats`).
+- Safe macOS and iOS lifecycle management.
 
 ```swift
 //
 //  PacketTunnelProvider.swift
-//  WireGuardNetworkExtension
+//  WGExtension
 //
-//  Created by Alexandr Ruban on 05.10.2023.
-//
-
-// SPDX-License-Identifier: MIT
-// Copyright © 2018-2023 WireGuard LLC. All Rights Reserved.
 
 import Foundation
 import NetworkExtension
 import WireGuardKit
-
+import os.log
 
 enum PacketTunnelProviderError: String, Error {
     case invalidProtocolConfiguration
     case cantParseWgQuickConfig
 }
 
-
 extension String {
-
     func splitToArray(separator: Character = ",", trimmingCharacters: CharacterSet? = nil) -> [String] {
-        return split(separator: separator)
-            .map {
-                if let charSet = trimmingCharacters {
-                    return $0.trimmingCharacters(in: charSet)
-                } else {
-                    return String($0)
-                }
+        return split(separator: separator).map {
+            if let charSet = trimmingCharacters {
+                return $0.trimmingCharacters(in: charSet)
+            } else {
+                return String($0)
+            }
         }
     }
-
 }
-
 
 extension Optional where Wrapped == String {
-
     func splitToArray(separator: Character = ",", trimmingCharacters: CharacterSet? = nil) -> [String] {
         switch self {
-        case .none:
-            return []
-        case .some(let wrapped):
-            return wrapped.splitToArray(separator: separator, trimmingCharacters: trimmingCharacters)
+        case .none: return []
+        case .some(let wrapped): return wrapped.splitToArray(separator: separator, trimmingCharacters: trimmingCharacters)
         }
     }
-
 }
 
-
 extension TunnelConfiguration {
-
     enum ParserState {
         case inInterfaceSection
         case inPeerSection
@@ -226,7 +282,6 @@ extension TunnelConfiguration {
         var peerConfigurations = [PeerConfiguration]()
 
         let lines = wgQuickConfig.split { $0.isNewline }
-
         var parserState = ParserState.notInASection
         var attributes = [String: String]()
 
@@ -243,7 +298,6 @@ extension TunnelConfiguration {
 
             if !trimmedLine.isEmpty {
                 if let equalsIndex = trimmedLine.firstIndex(of: "=") {
-                    // Line contains an attribute
                     let keyWithCase = trimmedLine[..<equalsIndex].trimmingCharacters(in: .whitespacesAndNewlines)
                     let key = keyWithCase.lowercased()
                     let value = trimmedLine[trimmedLine.index(equalsIndex, offsetBy: 1)...].trimmingCharacters(in: .whitespacesAndNewlines)
@@ -274,9 +328,7 @@ extension TunnelConfiguration {
             }
 
             let isLastLine = lineIndex == lines.count - 1
-
             if isLastLine || lowercasedLine == "[interface]" || lowercasedLine == "[peer]" {
-                // Previous section has ended; process the attributes collected so far
                 if parserState == .inInterfaceSection {
                     let interface = try TunnelConfiguration.collate(interfaceAttributes: attributes)
                     guard interfaceConfiguration == nil else { throw ParseError.multipleInterfaces }
@@ -307,47 +359,6 @@ extension TunnelConfiguration {
         } else {
             throw ParseError.noInterface
         }
-    }
-
-    func asWgQuickConfig() -> String {
-        var output = "[Interface]\n"
-        output.append("PrivateKey = \(interface.privateKey.base64Key)\n")
-        if let listenPort = interface.listenPort {
-            output.append("ListenPort = \(listenPort)\n")
-        }
-        if !interface.addresses.isEmpty {
-            let addressString = interface.addresses.map { $0.stringRepresentation }.joined(separator: ", ")
-            output.append("Address = \(addressString)\n")
-        }
-        if !interface.dns.isEmpty || !interface.dnsSearch.isEmpty {
-            var dnsLine = interface.dns.map { $0.stringRepresentation }
-            dnsLine.append(contentsOf: interface.dnsSearch)
-            let dnsString = dnsLine.joined(separator: ", ")
-            output.append("DNS = \(dnsString)\n")
-        }
-        if let mtu = interface.mtu {
-            output.append("MTU = \(mtu)\n")
-        }
-
-        for peer in peers {
-            output.append("\n[Peer]\n")
-            output.append("PublicKey = \(peer.publicKey.base64Key)\n")
-            if let preSharedKey = peer.preSharedKey?.base64Key {
-                output.append("PresharedKey = \(preSharedKey)\n")
-            }
-            if !peer.allowedIPs.isEmpty {
-                let allowedIPsString = peer.allowedIPs.map { $0.stringRepresentation }.joined(separator: ", ")
-                output.append("AllowedIPs = \(allowedIPsString)\n")
-            }
-            if let endpoint = peer.endpoint {
-                output.append("Endpoint = \(endpoint.stringRepresentation)\n")
-            }
-            if let persistentKeepAlive = peer.persistentKeepAlive {
-                output.append("PersistentKeepalive = \(persistentKeepAlive)\n")
-            }
-        }
-
-        return output
     }
 
     private static func collate(interfaceAttributes attributes: [String: String]) throws -> InterfaceConfiguration {
@@ -434,37 +445,31 @@ extension TunnelConfiguration {
         }
         return peer
     }
-
 }
 
-
-
 public class PacketTunnelProvider: NEPacketTunnelProvider {
-   // Define the WireGuardAdapter instance.
     private lazy var adapter: WireGuardAdapter = {
         return WireGuardAdapter(with: self) { [weak self] _, message in
             self?.log(message)
         }
     }()
     
-    // Variables to track download/upload bytes and traffic stats.
     private var totalDownloadBytes: Int64 = 0
     private var totalUploadBytes: Int64 = 0
     private var lastDownloadBytes: Int64 = 0
     private var lastUploadBytes: Int64 = 0
     private var trafficStatsTimer: Timer?
 
-    // Function to log messages to console.
+    private static let logger = OSLog(subsystem: "com.example.vpnapp.WGExtension", category: "PacketTunnel")
+
     func log(_ message: String) {
+        os_log("%{public}@", log: PacketTunnelProvider.logger, type: .default, "WireGuard Tunnel: \(message)")
         print("WireGuard Tunnel: \(message)")
     }
 
-
-      // Function to start the tunnel.
     public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         log("Starting tunnel")
 
-        // Validate protocol configuration.
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfiguration = protocolConfiguration.providerConfiguration,
               let wgQuickConfig = providerConfiguration["wgQuickConfig"] as? String else {
@@ -480,8 +485,21 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
+        // Safety filter: strip IPv6 allowed IPs if interface has no IPv6 address to prevent routing errors
+        var activeConfig = tunnelConfiguration
+        let hasIPv6 = tunnelConfiguration.interface.addresses.contains { $0.address is IPv6Address }
+        if !hasIPv6 {
+            var updatedPeers = [PeerConfiguration]()
+            for peer in tunnelConfiguration.peers {
+                var updatedPeer = peer
+                updatedPeer.allowedIPs = peer.allowedIPs.filter { $0.address is IPv4Address }
+                updatedPeers.append(updatedPeer)
+            }
+            activeConfig = TunnelConfiguration(name: tunnelConfiguration.name, interface: tunnelConfiguration.interface, peers: updatedPeers)
+        }
+
         log("Starting WireGuard adapter with config")
-        adapter.start(tunnelConfiguration: tunnelConfiguration) { [weak self] adapterError in
+        adapter.start(tunnelConfiguration: activeConfig) { [weak self] adapterError in
             guard let self = self else { return }
             if let adapterError = adapterError {
                 self.log("WireGuard adapter error: \(adapterError.localizedDescription)")
@@ -489,19 +507,14 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                 let interfaceName = self.adapter.interfaceName ?? "unknown"
                 self.log("Tunnel interface is \(interfaceName)")
                 self.startTrafficMonitoring()
-              
             }
-              
             completionHandler(adapterError)
         }
     }
 
-
-
-     // Function to stop the tunnel.
     public override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         log("Stopping tunnel")
-          stopTrafficMonitoring()
+        stopTrafficMonitoring()
         adapter.stop { [weak self] error in
             guard let self = self else { return }
             if let error = error {
@@ -510,163 +523,154 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler()
 
             #if os(macOS)
-            exit(0) // HACK for macOS
+            exit(0) // Clean exit for macOS App Extensions
             #endif
         }
     }
 
-
-     // Function to start traffic monitoring with periodic updates.
     func startTrafficMonitoring() {
-    // Set a longer interval to reduce lag.
-    trafficStatsTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
-        guard let self = self else { return }
+        trafficStatsTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
 
-        // Run traffic stats processing in the background to prevent UI lag.
-        DispatchQueue.global(qos: .background).async {
-            self.adapter.getRuntimeConfiguration { config in
-                guard let configString = config else {
-                    self.log("Error: No config received.")
-                    return
-                }
-
-                if let configData = configString.data(using: .utf8) {
-                    do {
-                        struct WireGuardConfig: Decodable {
-                            var peers: [Peer]
-                            struct Peer: Decodable {
-                                var rxBytes: Int
-                                var txBytes: Int
+            DispatchQueue.global(qos: .background).async {
+                self.adapter.getRuntimeConfiguration { config in
+                    guard let configString = config else { return }
+                    if let configData = configString.data(using: .utf8) {
+                        do {
+                            struct WireGuardConfig: Decodable {
+                                var peers: [Peer]
+                                struct Peer: Decodable {
+                                    var rxBytes: Int
+                                    var txBytes: Int
+                                }
                             }
-                        }
 
-                        let parsedConfig = try JSONDecoder().decode(WireGuardConfig.self, from: configData)
-                        let peers = parsedConfig.peers
+                            let parsedConfig = try JSONDecoder().decode(WireGuardConfig.self, from: configData)
+                            var currentDownload: Int64 = 0
+                            var currentUpload: Int64 = 0
 
-                        var currentDownload: Int64 = 0
-                        var currentUpload: Int64 = 0
-
-                        // Calculate total download/upload from peers.
-                        for peer in peers {
-                            currentDownload += Int64(peer.rxBytes)
-                            currentUpload += Int64(peer.txBytes)
-                        }
-
-                        let downloadSpeed = currentDownload - self.lastDownloadBytes
-                        let uploadSpeed = currentUpload - self.lastUploadBytes
-
-                        // Update the last stats values.
-                        self.lastDownloadBytes = currentDownload
-                        self.lastUploadBytes = currentUpload
-
-                        // Update total stats.
-                        self.totalDownloadBytes = currentDownload
-                        self.totalUploadBytes = currentUpload
-
-                        // Update the stats in shared app group (main thread for UI updates).
-                        DispatchQueue.main.async {
-                            if let sharedDefaults = UserDefaults(suiteName: "group.com.orbanvpn.wireguard") {
-                                sharedDefaults.set(downloadSpeed, forKey: "downloadSpeed")
-                                sharedDefaults.set(uploadSpeed, forKey: "uploadSpeed")
-                                sharedDefaults.set(self.totalDownloadBytes, forKey: "totalDownloadBytes")
-                                sharedDefaults.set(self.totalUploadBytes, forKey: "totalUploadBytes")
+                            for peer in parsedConfig.peers {
+                                currentDownload += Int64(peer.rxBytes)
+                                currentUpload += Int64(peer.txBytes)
                             }
-                        }
 
-                    } catch {
-                        self.log("Error parsing WireGuard config: \(error)")
+                            let downloadSpeed = currentDownload - self.lastDownloadBytes
+                            let uploadSpeed = currentUpload - self.lastUploadBytes
+
+                            self.lastDownloadBytes = currentDownload
+                            self.lastUploadBytes = currentUpload
+                            self.totalDownloadBytes = currentDownload
+                            self.totalUploadBytes = currentUpload
+
+                            #if os(iOS)
+                            DispatchQueue.main.async {
+                                if let sharedDefaults = UserDefaults(suiteName: "group.com.example.vpnapp") {
+                                    sharedDefaults.set(downloadSpeed, forKey: "downloadSpeed")
+                                    sharedDefaults.set(uploadSpeed, forKey: "uploadSpeed")
+                                    sharedDefaults.set(self.totalDownloadBytes, forKey: "totalDownloadBytes")
+                                    sharedDefaults.set(self.totalUploadBytes, forKey: "totalUploadBytes")
+                                }
+                            }
+                            #endif
+                        } catch {
+                            self.log("Error parsing runtime config: \(error)")
+                        }
                     }
                 }
             }
         }
     }
-    }
 
-     // Function to stop traffic monitoring.
     func stopTrafficMonitoring() {
-    trafficStatsTimer?.invalidate()
-    trafficStatsTimer = nil
+        trafficStatsTimer?.invalidate()
+        trafficStatsTimer = nil
     }
 
+    public override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let message = String(data: messageData, encoding: .utf8) else {
+            completionHandler?(nil)
+            return
+        }
 
-public override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-    guard let message = String(data: messageData, encoding: .utf8) else {
-        completionHandler?(nil)
-        return
-    }
-
-    if message == "getStats" {
-        if let stats = getTrafficStats() {
-            let dict: [String: UInt64] = ["rx": stats.rx, "tx": stats.tx]
-            let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
-            completionHandler?(data)
+        if message == "getStats" {
+            if let stats = getTrafficStats() {
+                let dict: [String: UInt64] = ["rx": stats.rx, "tx": stats.tx]
+                let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
+                completionHandler?(data)
+            } else if self.totalDownloadBytes > 0 || self.totalUploadBytes > 0 {
+                let dict: [String: UInt64] = ["rx": UInt64(max(0, self.totalDownloadBytes)), "tx": UInt64(max(0, self.totalUploadBytes))]
+                let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
+                completionHandler?(data)
+            } else {
+                completionHandler?(nil)
+            }
         } else {
-            print("Unable to get traffic stats")
             completionHandler?(nil)
         }
-    } else {
-        completionHandler?(nil)
     }
-}
 
-func getTrafficStats() -> (rx: UInt64, tx: UInt64)? {
-    var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
-    guard getifaddrs(&ifaddr) == 0 else { return nil }
+    func getTrafficStats() -> (rx: UInt64, tx: UInt64)? {
+        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+        guard getifaddrs(&ifaddr) == 0 else { return nil }
 
-    var ptr = ifaddr
-    var rxBytes: UInt64 = 0
-    var txBytes: UInt64 = 0
+        var ptr = ifaddr
+        var rxBytes: UInt64 = 0
+        var txBytes: UInt64 = 0
 
-    while ptr != nil {
-        guard let interface = ptr?.pointee else { break }
-
-        let name = String(cString: interface.ifa_name)
-        // Adjust this name if your tunnel uses a different one (e.g., utun2, utun3, etc.)
-        if name.starts(with: "utun") {
-            if let data = interface.ifa_data?.assumingMemoryBound(to: if_data.self).pointee {
-                rxBytes += UInt64(data.ifi_ibytes)
-                txBytes += UInt64(data.ifi_obytes)
+        while ptr != nil {
+            guard let interface = ptr?.pointee else { break }
+            let name = String(cString: interface.ifa_name)
+            if name.starts(with: "utun") {
+                if let data = interface.ifa_data?.assumingMemoryBound(to: if_data.self).pointee {
+                    rxBytes += UInt64(data.ifi_ibytes)
+                    txBytes += UInt64(data.ifi_obytes)
+                }
             }
+            ptr = ptr?.pointee.ifa_next
         }
 
-        ptr = ptr?.pointee.ifa_next
+        freeifaddrs(ifaddr)
+        return (rxBytes, txBytes)
     }
 
-    freeifaddrs(ifaddr)
-    return (rxBytes, txBytes)
-}
+    public override func sleep(completionHandler: @escaping () -> Void) {
+        stopTrafficMonitoring()
+        super.sleep(completionHandler: completionHandler)
+    }
 
-public override func sleep(completionHandler: @escaping () -> Void) {
-    // Perform your custom logic before calling the superclass method
-    stopTrafficMonitoring() // For example, stop monitoring traffic when the tunnel goes to sleep.
-    
-    // Call the superclass method to properly handle the sleep state
-    super.sleep(completionHandler: completionHandler)
-}
-
-public override func wake() {
-    // Perform your custom logic before calling the superclass method
-    startTrafficMonitoring() // For example, restart monitoring traffic when the tunnel wakes up.
-
-    // Call the superclass method to properly handle the wake state
-    super.wake()
-}
-
-// Function to handle disconnection logic (e.g., when VPN connection is disconnected).
-func handleDisconnect() {
-    stopTrafficMonitoring()
-    // Additional cleanup if necessary.
-}
+    public override func wake() {
+        startTrafficMonitoring()
+        super.wake()
+    }
 }
 ```
 
+---
+
+## Real-Time Extension Debugging on macOS
+
+Standard `print()` output inside a Network Extension does not appear in the standard Flutter/Xcode debug console because the extension runs in an independent system daemon process (`nesessionmanager`).
+
+To monitor real-time extension and WireGuard Go logs, run the following in Terminal:
+```bash
+/usr/bin/log stream --predicate 'subsystem CONTAINS "WGExtension"' --level debug
+```
+
+---
+
 ## Troubleshooting
 
+- **`listen udp4 :0: bind: operation not permitted` / Connected but 0 download speed**:
+  Your macOS `WGExtension` target is missing the **Incoming Connections (Server)** entitlement. Enable **Incoming Connections (Server)** in `WGExtension` > **Signing & Capabilities** (or add `<key>com.apple.security.network.server</key><true/>` in `WGExtension.entitlements`).
+
+- **`Using kCFPreferencesAnyUser with a container is only allowed for System Containers, detaching from cfprefsd`**:
+  On macOS App Sandbox, App Groups require Apple's Team ID prefix (`$(TeamIdentifierPrefix)group.xxx`). In `wireguard_flutter_plus 1.0.8+`, the plugin automatically detects this and uses direct IPC (`sendProviderMessage`) and `UserDefaults.standard` on macOS to eliminate this error.
+
+- **Duration resets to `00:00:00` upon reopening or hot-restarting the app**:
+  Fixed in `wireguard_flutter_plus 1.0.8+`. The plugin preserves session timestamps across Flutter stream cancellations and queries Apple's native `NEVPNConnection.connectedDate` upon reconnecting to the stream.
+
 - **"make: .../wireguard-go-bridge/goroot/.prepared Error 1"**:
-  install cmake: `arch -arm64 brew install cmake`
+  Install cmake via Homebrew: `arch -arm64 brew install cmake`.
 
 - **"source files not found"**:
-  Restart the build. Xcode might be building dependencies in parallel incorrectly.
-
-- **"vpn_last_download" not updating?**
-  Ensure both targets have the exact same App Group enabled and that you are passing the correct string to `iosAppGroup`.
+  Clean and rebuild Xcode workspace (`Product > Clean Build Folder`). Xcode may have attempted parallel compilation before the Go static library finished building.

@@ -21,9 +21,9 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		304238AE2FB2EAE4000CB031 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 306BA1762F3721160059ECD0 /* NetworkExtension.framework */; };
-		304238B92FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = 304238AD2FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		304238F12FB2F016000CB031 /* WireGuardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 304238F02FB2F016000CB031 /* WireGuardKit */; };
+		301CD962307BFAF900FBB722 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 306BA1762F3721160059ECD0 /* NetworkExtension.framework */; };
+		301CD96A307BFAF900FBB722 /* WGExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 301CD961307BFAF900FBB722 /* WGExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		301CD986307BFCE200FBB722 /* WireGuardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 301CD985307BFCE200FBB722 /* WireGuardKit */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -32,16 +32,22 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		41E86D675FFBFDE9B2C04116 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4EED8BCBC92D9B0D59370DD6 /* Pods_Runner.framework */; };
 		6989DA47E76A6BAFB90E5CF2 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D167E2DA506D8F4D8803E50 /* Pods_RunnerTests.framework */; };
-		E0905EDC0A095DB4F79EFAEB /* Pods_WGSystemExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D73496D3B096CDCC36DF612 /* Pods_WGSystemExtension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		304238B62FB2EAE4000CB031 /* PBXContainerItemProxy */ = {
+		301CD968307BFAF900FBB722 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 304238AC2FB2EAE4000CB031;
-			remoteInfo = WGSystemExtension;
+			remoteGlobalIDString = 301CD960307BFAF900FBB722;
+			remoteInfo = WGExtension;
+		};
+		301CD970307BFC3900FBB722 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 306BA1892F37220C0059ECD0;
+			remoteInfo = WireGuardGoBridgeMacOS;
 		};
 		331C80D9294CF71000263BE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -66,7 +72,6 @@
 			dstPath = "$(SYSTEM_EXTENSIONS_FOLDER_PATH)";
 			dstSubfolderSpec = 16;
 			files = (
-				304238B92FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension in Embed System Extensions */,
 			);
 			name = "Embed System Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,6 +82,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				301CD96A307BFAF900FBB722 /* WGExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,7 +102,7 @@
 /* Begin PBXFileReference section */
 		17DB8C6A563EEF705255BF07 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		2DDDB60F15198C5B4AF0353E /* Pods-WGSystemExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WGSystemExtension.release.xcconfig"; path = "Target Support Files/Pods-WGSystemExtension/Pods-WGSystemExtension.release.xcconfig"; sourceTree = "<group>"; };
-		304238AD2FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension */ = {isa = PBXFileReference; explicitFileType = "wrapper.system-extension"; includeInIndex = 0; path = com.orbanvpn.wireguard.WGSystemExtension.systemextension; sourceTree = BUILT_PRODUCTS_DIR; };
+		301CD961307BFAF900FBB722 /* WGExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WGExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		306BA1762F3721160059ECD0 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		310F5B9A1E00C1EF879925C1 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,20 +135,31 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		304238BD2FB2EAE4000CB031 /* Exceptions for "WGSystemExtension" folder in "WGSystemExtension" target */ = {
+		301CD96B307BFAF900FBB722 /* Exceptions for "WGExtension" folder in "WGExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 304238AC2FB2EAE4000CB031 /* WGSystemExtension */;
+			target = 301CD960307BFAF900FBB722 /* WGExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		301CD963307BFAF900FBB722 /* WGExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				301CD96B307BFAF900FBB722 /* Exceptions for "WGExtension" folder in "WGExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = WGExtension;
+			sourceTree = "<group>";
+		};
 		304238AF2FB2EAE4000CB031 /* WGSystemExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				304238BD2FB2EAE4000CB031 /* Exceptions for "WGSystemExtension" folder in "WGSystemExtension" target */,
 			);
 			explicitFileTypes = {
 			};
@@ -154,13 +171,12 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		304238AA2FB2EAE4000CB031 /* Frameworks */ = {
+		301CD95E307BFAF900FBB722 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				304238F12FB2F016000CB031 /* WireGuardKit in Frameworks */,
-				304238AE2FB2EAE4000CB031 /* NetworkExtension.framework in Frameworks */,
-				E0905EDC0A095DB4F79EFAEB /* Pods_WGSystemExtension.framework in Frameworks */,
+				301CD986307BFCE200FBB722 /* WireGuardKit in Frameworks */,
+				301CD962307BFAF900FBB722 /* NetworkExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -225,6 +241,7 @@
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
 				304238AF2FB2EAE4000CB031 /* WGSystemExtension */,
+				301CD963307BFAF900FBB722 /* WGExtension */,
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
 				0629D02AC53EE54ABBB56DE9 /* Pods */,
@@ -236,7 +253,7 @@
 			children = (
 				33CC10ED2044A3C60003C045 /* wireguard_flutter_plus_example.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
-				304238AD2FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension */,
+				301CD961307BFAF900FBB722 /* WGExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -307,26 +324,26 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		304238AC2FB2EAE4000CB031 /* WGSystemExtension */ = {
+		301CD960307BFAF900FBB722 /* WGExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 304238BE2FB2EAE4000CB031 /* Build configuration list for PBXNativeTarget "WGSystemExtension" */;
+			buildConfigurationList = 301CD96C307BFAF900FBB722 /* Build configuration list for PBXNativeTarget "WGExtension" */;
 			buildPhases = (
-				BD49188CF860E6813CE49EC6 /* [CP] Check Pods Manifest.lock */,
-				304238A92FB2EAE4000CB031 /* Sources */,
-				304238AA2FB2EAE4000CB031 /* Frameworks */,
-				304238AB2FB2EAE4000CB031 /* Resources */,
+				301CD95D307BFAF900FBB722 /* Sources */,
+				301CD95E307BFAF900FBB722 /* Frameworks */,
+				301CD95F307BFAF900FBB722 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				301CD971307BFC3900FBB722 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				304238AF2FB2EAE4000CB031 /* WGSystemExtension */,
+				301CD963307BFAF900FBB722 /* WGExtension */,
 			);
-			name = WGSystemExtension;
-			productName = WGSystemExtension;
-			productReference = 304238AD2FB2EAE4000CB031 /* com.orbanvpn.wireguard.WGSystemExtension.systemextension */;
-			productType = "com.apple.product-type.system-extension";
+			name = WGExtension;
+			productName = WGExtension;
+			productReference = 301CD961307BFAF900FBB722 /* WGExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		331C80D4294CF70F00263BE5 /* RunnerTests */ = {
 			isa = PBXNativeTarget;
@@ -365,7 +382,7 @@
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
-				304238B72FB2EAE4000CB031 /* PBXTargetDependency */,
+				301CD969307BFAF900FBB722 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -383,7 +400,7 @@
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
-					304238AC2FB2EAE4000CB031 = {
+					301CD960307BFAF900FBB722 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 					306BA1892F37220C0059ECD0 = {
@@ -418,7 +435,7 @@
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
-				304238EF2FB2F016000CB031 /* XCRemoteSwiftPackageReference "wireguard-apple" */,
+				301CD984307BFCE200FBB722 /* XCRemoteSwiftPackageReference "wireguard-apple" */,
 			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
@@ -428,13 +445,13 @@
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
 				306BA1892F37220C0059ECD0 /* WireGuardGoBridgeMacOS */,
-				304238AC2FB2EAE4000CB031 /* WGSystemExtension */,
+				301CD960307BFAF900FBB722 /* WGExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		304238AB2FB2EAE4000CB031 /* Resources */ = {
+		301CD95F307BFAF900FBB722 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -559,32 +576,10 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		BD49188CF860E6813CE49EC6 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-WGSystemExtension-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		304238A92FB2EAE4000CB031 /* Sources */ = {
+		301CD95D307BFAF900FBB722 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -612,10 +607,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		304238B72FB2EAE4000CB031 /* PBXTargetDependency */ = {
+		301CD969307BFAF900FBB722 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 304238AC2FB2EAE4000CB031 /* WGSystemExtension */;
-			targetProxy = 304238B62FB2EAE4000CB031 /* PBXContainerItemProxy */;
+			target = 301CD960307BFAF900FBB722 /* WGExtension */;
+			targetProxy = 301CD968307BFAF900FBB722 /* PBXContainerItemProxy */;
+		};
+		301CD971307BFC3900FBB722 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 306BA1892F37220C0059ECD0 /* WireGuardGoBridgeMacOS */;
+			targetProxy = 301CD970307BFC3900FBB722 /* PBXContainerItemProxy */;
 		};
 		331C80DA294CF71000263BE5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -642,9 +642,8 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		304238BA2FB2EAE4000CB031 /* Debug */ = {
+		301CD96D307BFAF900FBB722 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D77022D02899EBC66B5A8A58 /* Pods-WGSystemExtension.debug.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -655,7 +654,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = WGSystemExtension/WGSystemExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WGExtension/WGExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -664,41 +663,26 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
-				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
-				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
-				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
-				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = WGSystemExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = WGSystemExtension;
+				INFOPLIST_FILE = WGExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WGExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}\"",
-					/usr/lib/swift,
-					"$(SRCROOT)/WireGuardKitGo/out",
-				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PATH = "${PATH}:/usr/local/go/bin";
-				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGSystemExtension;
-				PRODUCT_NAME = "$(inherited)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -710,9 +694,8 @@
 			};
 			name = Debug;
 		};
-		304238BB2FB2EAE4000CB031 /* Release */ = {
+		301CD96E307BFAF900FBB722 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2DDDB60F15198C5B4AF0353E /* Pods-WGSystemExtension.release.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -723,7 +706,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = WGSystemExtension/WGSystemExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WGExtension/WGExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -732,40 +715,25 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
-				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
-				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
-				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
-				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = WGSystemExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = WGSystemExtension;
+				INFOPLIST_FILE = WGExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WGExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}\"",
-					/usr/lib/swift,
-					"$(SRCROOT)/WireGuardKitGo/out",
-				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
 				PATH = "${PATH}:/usr/local/go/bin";
-				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGSystemExtension;
-				PRODUCT_NAME = "$(inherited)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -776,9 +744,8 @@
 			};
 			name = Release;
 		};
-		304238BC2FB2EAE4000CB031 /* Profile */ = {
+		301CD96F307BFAF900FBB722 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 96EAB4D9B685F4AE163DE312 /* Pods-WGSystemExtension.profile.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -789,7 +756,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = WGSystemExtension/WGSystemExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WGExtension/WGExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -798,40 +765,25 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
-				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
-				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
-				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
-				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = WGSystemExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = WGSystemExtension;
+				INFOPLIST_FILE = WGExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WGExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}\"",
-					/usr/lib/swift,
-					"$(SRCROOT)/WireGuardKitGo/out",
-				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
 				PATH = "${PATH}:/usr/local/go/bin";
-				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGSystemExtension;
-				PRODUCT_NAME = "$(inherited)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard.WGExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1038,7 +990,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PATH = "${PATH}:/usr/local/go/bin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1178,7 +1130,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PATH = "${PATH}:/usr/local/go/bin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1215,7 +1167,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PATH = "${PATH}:/usr/local/go/bin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.orbanvpn.wireguard;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1245,12 +1197,12 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		304238BE2FB2EAE4000CB031 /* Build configuration list for PBXNativeTarget "WGSystemExtension" */ = {
+		301CD96C307BFAF900FBB722 /* Build configuration list for PBXNativeTarget "WGExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				304238BA2FB2EAE4000CB031 /* Debug */,
-				304238BB2FB2EAE4000CB031 /* Release */,
-				304238BC2FB2EAE4000CB031 /* Profile */,
+				301CD96D307BFAF900FBB722 /* Debug */,
+				301CD96E307BFAF900FBB722 /* Release */,
+				301CD96F307BFAF900FBB722 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1308,7 +1260,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		304238EF2FB2F016000CB031 /* XCRemoteSwiftPackageReference "wireguard-apple" */ = {
+		301CD984307BFCE200FBB722 /* XCRemoteSwiftPackageReference "wireguard-apple" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/aakashch0179/wireguard-apple";
 			requirement = {
@@ -1319,9 +1271,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		304238F02FB2F016000CB031 /* WireGuardKit */ = {
+		301CD985307BFCE200FBB722 /* WireGuardKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 304238EF2FB2F016000CB031 /* XCRemoteSwiftPackageReference "wireguard-apple" */;
+			package = 301CD984307BFCE200FBB722 /* XCRemoteSwiftPackageReference "wireguard-apple" */;
 			productName = WireGuardKit;
 		};
 /* End XCSwiftPackageProductDependency section */

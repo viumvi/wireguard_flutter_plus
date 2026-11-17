@@ -11,6 +11,7 @@
 import Foundation
 import NetworkExtension
 import WireGuardKit
+import os.log
 
 
 enum PacketTunnelProviderError: String, Error {
@@ -314,8 +315,11 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
     private var lastUploadBytes: Int64 = 0
     private var trafficStatsTimer: Timer?
 
+    private static let logger = OSLog(subsystem: "com.orbanvpn.wireguard.WGExtension", category: "PacketTunnel")
+
     // Function to log messages to console.
     func log(_ message: String) {
+        os_log("%{public}@", log: PacketTunnelProvider.logger, type: .default, "WireGuard Tunnel: \(message)")
         print("WireGuard Tunnel: \(message)")
     }
 
@@ -340,8 +344,20 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
+        var activeConfig = tunnelConfiguration
+        let hasIPv6 = tunnelConfiguration.interface.addresses.contains { $0.address is IPv6Address }
+        if !hasIPv6 {
+            var updatedPeers = [PeerConfiguration]()
+            for peer in tunnelConfiguration.peers {
+                var updatedPeer = peer
+                updatedPeer.allowedIPs = peer.allowedIPs.filter { $0.address is IPv4Address }
+                updatedPeers.append(updatedPeer)
+            }
+            activeConfig = TunnelConfiguration(name: tunnelConfiguration.name, interface: tunnelConfiguration.interface, peers: updatedPeers)
+        }
+
         log("Starting WireGuard adapter with config")
-        adapter.start(tunnelConfiguration: tunnelConfiguration) { [weak self] adapterError in
+        adapter.start(tunnelConfiguration: activeConfig) { [weak self] adapterError in
             guard let self = self else { return }
             if let adapterError = adapterError {
                 self.log("WireGuard adapter error: \(adapterError.localizedDescription)")
@@ -368,12 +384,6 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                 self.log("Failed to stop WireGuard adapter: \(error.localizedDescription)")
             }
             completionHandler()
-
-            #if os(macOS)
-            if Bundle.main.bundleURL.pathExtension != "systemextension" {
-             exit(0) // Only exit if it's a standard App Extension
-            }
-            #endif
         }
     }
 
@@ -426,6 +436,7 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                         self.totalUploadBytes = currentUpload
 
                         // Update the stats in shared app group (main thread for UI updates).
+                        #if os(iOS)
                         DispatchQueue.main.async {
                             if let sharedDefaults = UserDefaults(suiteName: "group.com.orbanvpn.wireguard") {
                                 sharedDefaults.set(downloadSpeed, forKey: "downloadSpeed")
@@ -434,6 +445,7 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                                 sharedDefaults.set(self.totalUploadBytes, forKey: "totalUploadBytes")
                             }
                         }
+                        #endif
 
                     } catch {
                         self.log("Error parsing WireGuard config: \(error)")
@@ -460,6 +472,10 @@ public override func handleAppMessage(_ messageData: Data, completionHandler: ((
     if message == "getStats" {
         if let stats = getTrafficStats() {
             let dict: [String: UInt64] = ["rx": stats.rx, "tx": stats.tx]
+            let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
+            completionHandler?(data)
+        } else if self.totalDownloadBytes > 0 || self.totalUploadBytes > 0 {
+            let dict: [String: UInt64] = ["rx": UInt64(max(0, self.totalDownloadBytes)), "tx": UInt64(max(0, self.totalUploadBytes))]
             let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
             completionHandler?(data)
         } else {

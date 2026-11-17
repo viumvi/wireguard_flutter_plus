@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:wireguard_flutter_plus/wireguard_flutter_plus.dart';
@@ -45,17 +46,16 @@ class _MyAppState extends State<MyApp> {
   final _config = TextEditingController(
     text: '''
 [Interface]
-PrivateKey = GEin20qgtPLGhcDp6CJW3EKlIKDJo+EU1CAfQN3c5Wk=
+PrivateKey = SC34vnBNgzjQmS9AUhW5roFPFVQG3OOhG81oyAYZNH8=
 Address = 10.0.0.2/32
 DNS = 1.1.1.1, 1.0.0.1
-MTU = 1420
+MTU = 1280
 
-# Peer
+# SecureGate-1
 [Peer]
-PublicKey = jwZL4jcWx+TYRe5eHLidkxKcYGVr19mfJ9QQWCztsGA=
-AllowedIPs = 0.0.0.0/0
-Endpoint = poland.vpnserverhub.com:48874
-
+PublicKey = BNNu+xHcTqH0FaL8kl9+XTt+ubpZXbNUNHpIPFcEEy4=
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = canada.vpnserverhub.com:46953
 
  ''',
   );
@@ -68,6 +68,7 @@ Endpoint = poland.vpnserverhub.com:48874
     Future.delayed(const Duration(milliseconds: 500), () {
       _vpnTraffic = wireguard.trafficSnapshot.listen((data) {
         if (mounted) {
+          log(data.toString());
           setState(() {
             downloadCount =
                 formatSpeed(double.parse(data["downloadSpeed"].toString()));
@@ -83,6 +84,7 @@ Endpoint = poland.vpnserverhub.com:48874
       });
 
       _vpnStatusSubscription = wireguard.vpnStageSnapshot.listen((event) async {
+        log(event.name);
         if (mounted) {
           setState(() {
             vpnState = event.name;
@@ -102,22 +104,31 @@ Endpoint = poland.vpnserverhub.com:48874
     });
   }
 
+  @override
+  void dispose() {
+    _vpnTraffic?.cancel();
+    _vpnStatusSubscription?.cancel();
+    _config.dispose();
+    super.dispose();
+  }
+
   Future<void> initialize() async {
-    if (Platform.isMacOS) {
-      try {
-        await wireguard.requestMacSystemExtension(
-            'com.orbanvpn.wireguard.WGSystemExtension');
-        // The user may need to go to System Settings -> Privacy & Security -> Allow
-      } catch (e) {
-        print('Failed to install system extension: $e');
-        return;
-      }
-    }
+    // if (Platform.isMacOS) {
+    //   try {
+    //     await wireguard
+    //         .requestMacSystemExtension('com.orbanvpn.wireguard.WGExtension');
+    //     // The user may need to go to System Settings -> Privacy & Security -> Allow
+    //   } catch (e) {
+    //     print('System extension request notice: $e');
+    //     // If extension is already installed, or in development mode, continue initialization
+    //   }
+    // }
     try {
       await wireguard.initialize(
         interfaceName: "wgflutter",
         vpnName: "Orban VPN",
-        extensionBundleId: "com.orbanvpn.wireguard.WGSystemExtension",
+        iosAppGroup: "group.com.orbanvpn.wireguard",
+        // extensionBundleId: "com.orbanvpn.wireguard.WGExtension",
       );
     } catch (_) {}
   }
@@ -133,11 +144,13 @@ Endpoint = poland.vpnserverhub.com:48874
   void startVpn() async {
     try {
       await wireguard.startVpn(
-          serverAddress: '144.217.253.149:443',
-          wgQuickConfig: _config.text,
-          providerBundleIdentifier: 'com.orbanvpn.wireguard.WGSystemExtension',
-          includedApps: ['com.android.chrome']);
-    } catch (_) {}
+        serverAddress: 'canada.vpnserverhub.com',
+        wgQuickConfig: _config.text,
+        providerBundleIdentifier: 'com.orbanvpn.wireguard.WGExtension',
+      );
+    } catch (e) {
+      log('startVpn error: $e');
+    }
   }
 
   void disconnect() async {
@@ -200,6 +213,7 @@ Endpoint = poland.vpnserverhub.com:48874
                 uploadSpeed: uploadCount,
                 totalDownload: totalDownload,
                 totalUpload: totalUpload,
+                duration: duration,
               ),
               const SizedBox(height: 40),
               ConfigInputWidget(controller: _config),

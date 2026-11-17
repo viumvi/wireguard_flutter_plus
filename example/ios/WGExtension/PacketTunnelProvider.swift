@@ -463,6 +463,10 @@ public override func handleAppMessage(_ messageData: Data, completionHandler: ((
             let dict: [String: UInt64] = ["rx": stats.rx, "tx": stats.tx]
             let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
             completionHandler?(data)
+        } else if self.totalDownloadBytes > 0 || self.totalUploadBytes > 0 {
+            let dict: [String: UInt64] = ["rx": UInt64(max(0, self.totalDownloadBytes)), "tx": UInt64(max(0, self.totalUploadBytes))]
+            let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
+            completionHandler?(data)
         } else {
             print("Unable to get traffic stats")
             completionHandler?(nil)

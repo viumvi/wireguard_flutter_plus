@@ -125,3 +125,24 @@ Future<void> setupAndConnect() async {
 
 > [!NOTE]
 > System extensions are persistent daemons. When the tunnel is stopped, `wireguard_flutter_plus` will no longer call `exit(0)` on macOS System Extensions, ensuring they remain in memory and ready for the next connection.
+
+---
+
+## 5. Development & Testing Requirements
+
+macOS enforces strict security rules for System Extensions:
+
+1. **The `/Applications` Folder Requirement**:
+   By default, macOS only allows apps located in the `/Applications` folder to activate a System Extension. If you run a debug build directly from `build/macos/Build/Products/Debug/`, macOS will fail with:
+   ```
+   System Extension installation failed with error: App containing System Extension to be activated must be in /Applications folder.
+   ```
+2. **Enabling Developer Mode for Local Debugging**:
+   To test System Extensions during development without moving your debug `.app` to `/Applications`, run the following in Terminal:
+   ```bash
+   systemextensionsctl developer on
+   ```
+   *(To turn off later: `systemextensionsctl developer off`)*
+
+3. **Alternative for App Store Apps**:
+   If you do not require a System Extension (e.g. for App Store distribution), use the traditional App Extension (`WGExtension` with `.appex`) instead. App Extensions do not require `/Applications` or `requestMacSystemExtension`.

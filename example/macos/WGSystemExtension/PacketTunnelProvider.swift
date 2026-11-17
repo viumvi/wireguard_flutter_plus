@@ -426,6 +426,7 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                         self.totalUploadBytes = currentUpload
 
                         // Update the stats in shared app group (main thread for UI updates).
+                        #if os(iOS)
                         DispatchQueue.main.async {
                             if let sharedDefaults = UserDefaults(suiteName: "group.com.orbanvpn.wireguard") {
                                 sharedDefaults.set(downloadSpeed, forKey: "downloadSpeed")
@@ -434,6 +435,7 @@ public class PacketTunnelProvider: NEPacketTunnelProvider {
                                 sharedDefaults.set(self.totalUploadBytes, forKey: "totalUploadBytes")
                             }
                         }
+                        #endif
 
                     } catch {
                         self.log("Error parsing WireGuard config: \(error)")
@@ -460,6 +462,10 @@ public override func handleAppMessage(_ messageData: Data, completionHandler: ((
     if message == "getStats" {
         if let stats = getTrafficStats() {
             let dict: [String: UInt64] = ["rx": stats.rx, "tx": stats.tx]
+            let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
+            completionHandler?(data)
+        } else if self.totalDownloadBytes > 0 || self.totalUploadBytes > 0 {
+            let dict: [String: UInt64] = ["rx": UInt64(max(0, self.totalDownloadBytes)), "tx": UInt64(max(0, self.totalUploadBytes))]
             let data = try? JSONSerialization.data(withJSONObject: dict, options: [])
             completionHandler?(data)
         } else {

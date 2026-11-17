@@ -64,6 +64,7 @@ class WireGuardFlutter extends WireGuardFlutterInterface {
   /// Requests macOS system extension installation.
   ///
   /// [bundleId] is the bundle ID of the System Extension.
+  @override
   Future<void> requestMacSystemExtension(String bundleId) async {
     if (Platform.isMacOS) {
       await _instance.requestMacSystemExtension(bundleId);
